@@ -292,17 +292,18 @@ if __name__ == '__main__':
 
     How to activate:
     1. Open up Chrome with the (--remote-debugging-port=9222) flag.
-    2. Go to surviv.io and open up the debugger and place a breakpoint at line 75020 in app.js.
-    3. Join a game, then after the breakpoint is hit, enter the following into the console:
+    2. Go to surviv.io and open up the debugger.
+    3. Prettify the code in sources at surviv.io/js/app.
+    4. Place a breakpoint at line 75020 and join a game.
+    3. When the breakpoint is hit, enter the following into the console:
 
     windw.pool = _0x5d6daa.m_playerPool;
     window.pixiApp = _0x41b8c9.game.pixi;
     window.input = _0x3e3b49.input;
     window.displayInfo = _0x401da4;o
 
-    4. Close the debugger and run (python pypp.py) in your terminal.
+    4. Close the debugger and run (python bot.py) in your terminal.
     5. Play!
-    6. For the next game, you need to repeat the steps.
     '''
 
     parser = argparse.ArgumentParser(description=description, 
