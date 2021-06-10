@@ -245,11 +245,11 @@ def main(args):
     bot.args = args
     bot.start()
 
-    if args.direction_lock_key == 'shift':
+    if args.aim_lock_key == 'shift':
       aim_lock_key = keyboard.Key.shift
     else:
-      aim_lock_key = keyboard.KeyCode(char=args.direction_lock_key)
-    flurry_lock_key = keyboard.KeyCode(char=args.movement_lock_key)
+      aim_lock_key = keyboard.KeyCode(char=args.aim_lock_key)
+    flurry_lock_key = keyboard.KeyCode(char=args.flurry_lock_key)
     fire_lock_key = keyboard.KeyCode(char=args.fire_lock_key)
     stop_key = keyboard.KeyCode(char=args.stop_key)
 
@@ -302,16 +302,17 @@ if __name__ == '__main__':
 
     4. Close the debugger and run (python pypp.py) in your terminal.
     5. Play!
+    6. For the next game, you need to repeat the steps.
     '''
 
     parser = argparse.ArgumentParser(description=description, 
                                      formatter_class=RawTextHelpFormatter)
-    parser.add_argument('--direction_lock_key', type=str, default="shift",
-                         help='key to lock direction onto a target')
-    parser.add_argument('--movement_lock_key', type=str, default="q",
-                         help='key to lock movement onto a direction locked target')
+    parser.add_argument('--aim_lock_key', type=str, default="shift",
+                         help='hold key to lock aim onto a target')
+    parser.add_argument('--flurry_lock_key', type=str, default="q",
+                         help='hold key to flurry attack a target')
     parser.add_argument('--fire_lock_key', type=str, default="f",
-                         help='key to lock firing onto a direction locked target')
+                         help='key to activate automatic firing')
     parser.add_argument('--stop_key', type=str, default="L",
                          help='key to stop the program')
     parser.add_argument('--screen_width', type=int, default=2560,
