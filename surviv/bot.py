@@ -107,8 +107,8 @@ class SurvivBot(threading.Thread):
      }
      '''
 
-    width, height = 1920, 970
-    self.middle_of_screen = {'x': width/2, 'y': height/2}
+    self.middle_of_screen = {'x': self.args.screen_width/2, 
+                             'y': self.args.screen_height/2}
 
     n = (1/np.sqrt(2))
     self.mov_dirs = np.array([[0, 1],
@@ -125,7 +125,8 @@ class SurvivBot(threading.Thread):
     self.target_vel = np.array([0, 0])
 
     await self.page.evaluate(tracing_code)
-    await self.page.setViewport({'width': width, 'height': height})
+    await self.page.setViewport({'width': self.args.screen_width, 
+                                 'height': self.args.screen_height})
 
     print("Succesfully injected!")
     self.online = True
@@ -241,6 +242,7 @@ class SurvivBot(threading.Thread):
 
 def main(args):
     bot = SurvivBot()
+    bot.args = args
     bot.start()
 
     if args.direction_lock_key == 'shift':
@@ -293,10 +295,10 @@ if __name__ == '__main__':
     2. Go to surviv.io and open up the debugger and place a breakpoint at line 75020 in app.js.
     3. Join a game, then after the breakpoint is hit, enter the following into the console:
 
-    window.pool = _0x3e3f98.m_playerPool;
-    window.pixiApp = _0x557313.game.pixi;
-    window.input = _0x171e2a.input;
-    window.displayInfo = _0x20bcda;
+    windw.pool = _0x5d6daa.m_playerPool;
+    window.pixiApp = _0x41b8c9.game.pixi;
+    window.input = _0x3e3b49.input;
+    window.displayInfo = _0x401da4;o
 
     4. Close the debugger and run (python pypp.py) in your terminal.
     5. Play!
@@ -312,6 +314,10 @@ if __name__ == '__main__':
                          help='key to lock firing onto a direction locked target')
     parser.add_argument('--stop_key', type=str, default="L",
                          help='key to stop the program')
+    parser.add_argument('--screen_width', type=int, default=2560,
+                         help='width of your screen')
+    parser.add_argument('--screen_height', type=int, default=1330,
+                         help='height of your screen')
     args = parser.parse_args()
 
     main(args)
