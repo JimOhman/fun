@@ -294,7 +294,7 @@ if __name__ == '__main__':
     1. Open up Chrome with the (--remote-debugging-port=9222) flag.
     2. Go to surviv.io and open up the debugger.
     3. Prettify the code in sources at surviv.io/js/app.
-    4. Place a breakpoint at line 75020 and join a game.
+    4. Place a breakpoint at line 75045 and join a game.
     3. When the breakpoint is hit, enter the following into the console:
 
     windw.pool = _0x5d6daa.m_playerPool;
