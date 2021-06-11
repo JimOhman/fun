@@ -287,24 +287,7 @@ if __name__ == '__main__':
     from argparse import RawTextHelpFormatter
     import argparse
 
-    description = '''
-    Surviv hack using the Chrome debugger!
-
-    How to activate:
-    1. Open up Chrome with the (--remote-debugging-port=9222) flag.
-    2. Go to surviv.io and open up the debugger.
-    3. Prettify the code in sources at surviv.io/js/app.
-    4. Place a breakpoint at line 75045 and join a game.
-    3. When the breakpoint is hit, enter the following into the console:
-
-    windw.pool = _0x5d6daa.m_playerPool;
-    window.pixiApp = _0x41b8c9.game.pixi;
-    window.input = _0x3e3b49.input;
-    window.displayInfo = _0x401da4;o
-
-    4. Close the debugger and run (python bot.py) in your terminal.
-    5. Play!
-    '''
+    description = '''Surviv hack for the Chrome debugger!'''
 
     parser = argparse.ArgumentParser(description=description, 
                                      formatter_class=RawTextHelpFormatter)
