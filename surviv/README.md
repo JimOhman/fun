@@ -25,7 +25,7 @@ Currently, it is a bit annoying to start but its not too bad once you get used t
      windw.pool = _0x5d6daa.m_playerPool;
      window.pixiApp = _0x41b8c9.game.pixi;
      window.input = _0x3e3b49.input;
-     window.displayInfo = _0x401da4;o
+     window.displayInfo = _0x401da4;
 
 4. Close the debugger and run python bot.py.
 5. Play!
