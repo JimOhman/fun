@@ -25,6 +25,7 @@ class SurvivBot(threading.Thread):
 
     function pointToScreen(pos, me) {
       var scale = window.displayInfo.m_zoom * window.displayInfo.ppu; 
+      window.scale = scale;
       return {'x': window.displayInfo.screenWidth*0.5 + (pos.x - me.pos.x)*scale,
               'y': window.displayInfo.screenHeight*0.5 - (pos.y - me.pos.y)*scale};
     };
@@ -46,8 +47,6 @@ class SurvivBot(threading.Thread):
     function updateTraces(deltaTime) {
       var pool = window.pool.m_pool
       me = pool[0];
-
-      window.dT = deltaTime;
 
       myMousePos = window.input.m_mousePos;
       myPointMousePos = screenToPoint(myMousePos, me); 
@@ -77,8 +76,6 @@ class SurvivBot(threading.Thread):
 
             if (target.layer === me.layer) {
               var lineColor = closeColor;
-              window.targetInfo.push([[target.pos.x, target.pos.y],
-                                      [target.posOld.x, target.posOld.y]]);
             } else {
               var lineColor = belowColor;
             }
@@ -89,8 +86,11 @@ class SurvivBot(threading.Thread):
             trace.moveTo(myScreenPos.x, myScreenPos.y);
             trace.lineTo(targetScreenPos.x, targetScreenPos.y);
 
+            window.targetInfo.push([[target.pos.x, target.pos.y],
+                                    [target.posOld.x, target.posOld.y]]);
+
           }
-          else if (traces[targetId] !== undefined) {
+          else if (target.m_netData.m_dead && traces[targetId] !== undefined) {
             traces[targetId].destroy();
             delete traces[targetId];
           }
@@ -103,7 +103,10 @@ class SurvivBot(threading.Thread):
 
     self.grab_info_code = '''
      function() {
-       return [window.myInfo, window.targetInfo, window.gunType];
+       return [window.myInfo, 
+               window.targetInfo, 
+               window.gunType,
+               window.scale];
      }
      '''
 
@@ -119,7 +122,7 @@ class SurvivBot(threading.Thread):
                               [-n, n],
                               [n, -n],
                               [-n, -n]])
-    walking_speed = 0.21667
+    walking_speed = 0.39662
     ak47_ratio = 8.62908
     self.bullet_scale = walking_speed * ak47_ratio
     self.target_vel = np.array([0, 0])
@@ -131,49 +134,56 @@ class SurvivBot(threading.Thread):
     print("Succesfully injected!")
     self.online = True
   
-  def get_target_dir(self, target_pos, my_pos, gun_type):
+  def point_to_screen(self, point, scale):
+    x = self.middle_of_screen['x'] + point[0]*scale
+    y = self.middle_of_screen['y'] - point[1]*scale
+    return (x, y)
+  
+  def get_pred_target(self, target_pos, my_pos, gun_type):
     target_dir = target_pos - my_pos
-    bullet_speed = get_bullet_speed(gun_type)
-    if bullet_speed is None:
-      print("Bullet speed of {} not found!".format(gun_type))
-      return target_dir
     db = target_dir
+    dbn = np.dot(db, db)
     vp = self.target_vel
     vpn = np.dot(vp, vp)
-    if vpn < 1:
-      vbn = (self.bullet_scale * bullet_speed/100)**2
-      dbn = np.dot(db, db)
+    bullet_speed = get_bullet_speed(gun_type)
+    if bullet_speed is None:
+      shift = (-1/np.sqrt(dbn)) * db
+      target_pred = target_dir + shift
+      return target_pred
+    if 0 < vpn < 1:
+      vbn = (self.bullet_scale * (bullet_speed/100) * self.args.aim_fine_tune)**2
       bp = np.dot(db, vp)
       de = (vpn - vbn)
-      scale = (-2*bp - np.sqrt(bp**2 - 4*de*dbn)) / (2*de) 
-      target_dir = db + scale * vp * 0.65
-    return target_dir
+      scale = (-bp - np.sqrt(bp**2 - dbn*de)) / de
+      target_pred = db + scale * vp
+      shift = (self.args.aim_shift / np.sqrt(vpn)) * vp
+      target_pred = target_pred + shift
+      return target_pred
 
   def get_target(self, my_info, target_info, gun_type):
     my_pos, my_old_pos, my_mouse_pos = np.array(my_info)
     targets = np.array(target_info)
-
+    
     target_dists = ((targets[:, 0, :] - my_mouse_pos)**2).sum(axis=1)
     target_pos, target_old_pos = targets[target_dists.argmin()]
 
     if (target_pos != target_old_pos).any():
       self.target_vel = target_pos - target_old_pos
 
-    target_dir = self.get_target_dir(target_pos, 
-                                     my_pos,
-                                     gun_type)
-    return target_dir
+    target = self.get_pred_target(target_pos, 
+                                  my_pos,
+                                  gun_type)
+    return target
 
   async def mouse_lock(self):
     game_info = await self.page.evaluate(self.grab_info_code)
-    my_info, target_info, gun_type = game_info
+    my_info, target_info, gun_type, scale = game_info
 
     if target_info:
       target = self.get_target(my_info, target_info, gun_type)
 
       if target is not None:
-        x = (self.middle_of_screen['x'] + target[0])
-        y = (self.middle_of_screen['y'] - target[1])
+        x, y = self.point_to_screen(target, scale)
 
         if self.fire_lock_on:
           await self.page.mouse.click(x, y, options={'delay': 10})
@@ -299,6 +309,10 @@ if __name__ == '__main__':
                          help='key to activate automatic firing')
     parser.add_argument('--stop_key', type=str, default="L",
                          help='key to stop the program')
+    parser.add_argument('--aim_shift', type=float, default=-0.3,
+                         help='shifts the aim by this amount')
+    parser.add_argument('--aim_fine_tune', type=float, default=1.,
+                         help='fine tune the amount of aim prediction')
     parser.add_argument('--screen_width', type=int, default=2560,
                          help='width of your screen')
     parser.add_argument('--screen_height', type=int, default=1330,
