@@ -192,7 +192,7 @@ class SurvivBot(threading.Thread):
         x, y = self.point_to_screen(target, scale)
 
         if self.fire_lock_on:
-          await self.page.mouse.click(x, y, options={'delay': 10})
+          await self.page.mouse.click(x, y, options={'delay': 50})
         else:
           await self.page.mouse.move(x, y);
 
