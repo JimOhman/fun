@@ -152,7 +152,7 @@ class SurvivBot(threading.Thread):
       bullet_speed = get_bullet_speed(gun_type)
       if bullet_speed is None:
         bullet_speed = 100
-        aim_shift = -1
+        aim_shift = -0.5
       else:
         aim_shift = self.args.aim_shift
       vbn = (self.bullet_scale*(bullet_speed/100))**2
@@ -315,7 +315,7 @@ if __name__ == '__main__':
                          help='key to activate automatic firing')
     parser.add_argument('--stop_key', type=str, default="L",
                          help='key to stop the program')
-    parser.add_argument('--aim_shift', type=float, default=-0.3,
+    parser.add_argument('--aim_shift', type=float, default=0.,
                          help='shifts the aim by this amount')
     parser.add_argument('--aim_fine_tune', type=float, default=1.,
                          help='fine tune the amount of aim prediction')
