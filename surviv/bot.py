@@ -10,18 +10,18 @@ import time
 class SurvivBot(threading.Thread):
 
   async def _async_init(self):
-    connection = await pyp.connect(browserURL='http://127.0.0.1:9222')
-    self.page = (await connection.pages())[-1]
+    self.connection = await pyp.connect(browserURL='http://127.0.0.1:9222')
+    self.page = (await self.connection.pages())[-1]
 
     self.fire_lock_on = False
     self.mouse_lock_on = False
     self.keyboard_lock_on = False
     self.pressed = {'w': False, 'a': False, 's': False, 'd': False}
     self.needs_clear = False
-
+    
     tracing_code = '''
-    var screenWidth = window.displayInfo.screenWidth;
-    var screenHeight = window.displayInfo.screenHeight;
+    var gunInfo = {};
+    window['webpackJsonp'][1][1]['ad1c4e70'](gunInfo);
 
     function pointToScreen(pos, me) {
       var scale = window.displayInfo.m_zoom * window.displayInfo.ppu; 
@@ -53,7 +53,7 @@ class SurvivBot(threading.Thread):
       window.myInfo = [[me.pos.x, me.pos.y],
                        [me.posOld.x, me.posOld.y],
                        [myPointMousePos.x, myPointMousePos.y]];
-      window.gunType = me.weapTypeOld;
+      window.gunType = me.m_netData.m_curWeapType;
       window.targetInfo = [];
 
       for (let targetId in traces) {
@@ -125,6 +125,7 @@ class SurvivBot(threading.Thread):
     walking_speed = 0.39662
     ak47_ratio = 8.62908
     self.bullet_scale = walking_speed * ak47_ratio
+    self.bullet_scale *= self.args.aim_fine_tune
     self.target_vel = np.array([0, 0])
 
     await self.page.evaluate(tracing_code)
@@ -133,6 +134,8 @@ class SurvivBot(threading.Thread):
 
     print("Succesfully injected!")
     self.online = True
+
+    self.time = time.time()
   
   def point_to_screen(self, point, scale):
     x = self.middle_of_screen['x'] + point[0]*scale
@@ -140,24 +143,27 @@ class SurvivBot(threading.Thread):
     return (x, y)
   
   def get_pred_target(self, target_pos, my_pos, gun_type):
-    target_dir = target_pos - my_pos
-    db = target_dir
-    dbn = np.dot(db, db)
+    target_pred = target_pos - my_pos
     vp = self.target_vel
     vpn = np.dot(vp, vp)
-    bullet_speed = get_bullet_speed(gun_type)
-    if bullet_speed is None:
-      shift = (-1/np.sqrt(dbn)) * db
-      target_pred = target_dir + shift
-      return target_pred
     if 0 < vpn < 1:
-      vbn = (self.bullet_scale * (bullet_speed/100) * self.args.aim_fine_tune)**2
+      db = target_pred
+      dbn = np.dot(db, db)
+      bullet_speed = get_bullet_speed(gun_type)
+      if bullet_speed is None:
+        bullet_speed = 100
+        aim_shift = -1
+      else:
+        aim_shift = self.args.aim_shift
+      vbn = (self.bullet_scale*(bullet_speed/100))**2
       bp = np.dot(db, vp)
       de = (vpn - vbn)
       scale = (-bp - np.sqrt(bp**2 - dbn*de)) / de
       target_pred = db + scale * vp
-      shift = (self.args.aim_shift / np.sqrt(vpn)) * vp
+      shift = (aim_shift / np.sqrt(vpn)) * vp
       target_pred = target_pred + shift
+      return target_pred
+    elif vpn == 0:
       return target_pred
 
   def get_target(self, my_info, target_info, gun_type):
