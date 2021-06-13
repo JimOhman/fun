@@ -49,7 +49,7 @@ Then you can provide the integer values of these as arguments when you run pytho
 
 |Optional Arguments | Description|
 |:-------------|:-------------|
-| `--aim_lock_key`          |Hold this key to lock the aim onto a target close to your cursor. (default: Shift)|
+| `--aim_lock_key`          |Hold this key to lock the aim onto a target close to your cursor. (default: shift)|
 | `--flurry_lock_key`       |Hold this key to chase a target and punch quickly. (default: q)|
 | `--fire_lock_key`         |Activate automatic firing on aim locked targets. (default: f)|
 
