@@ -20,15 +20,15 @@ Currently, it is a bit annoying to start but its not too bad once you get used t
 2. Go to surviv.io and open up the debugger (Ctrl+Shift+I).
 3. In the Sources tab, open surviv.io/js/app.js and prettify the code.
 4. Place a breakpoint at line 75045 and join a game.
-3. When the breakpoint is hit, enter the following into the console:
+5. When the breakpoint is hit, enter the following into the console:
 
      window.pool = _0x3eb69a.m_playerPool;
      window.pixiApp = _0x1be72c.game.pixi;
      window.input = _0x4c20d4.input;
      window.displayInfo = _0x53d41f;
 
-4. Close the debugger and run python bot.py.
-5. Play!
+6. Close the debugger and run python bot.py.
+7. Play!
 ```
 To play a new game you have to close everything, use (Shift+L) for the bot, and repeat the steps.
 
