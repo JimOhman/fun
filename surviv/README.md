@@ -1,7 +1,7 @@
 # Surviv bot for Chrome
 
 A script that talks to the Chrome browser using [pyppeteer](https://github.com/pyppeteer/pyppeteer) and grabs info about the game.
-This info is then used to create an aimbot and wallhack, as well as punch chasing.
+This info is then used to create a predictive aimbot and wallhack, as well as automatic punch chasing.
 
 ---
 ## Installation:
@@ -26,6 +26,7 @@ Currently, it is a bit annoying to start but its not too bad once you get used t
      window.pixiApp = _0x1be72c.game.pixi;
      window.input = _0x4c20d4.input;
      window.displayInfo = _0x53d41f;
+     window.me = this;
 
 6. Close the debugger and run python bot.py.
 7. Play!
@@ -49,7 +50,9 @@ Then you can provide the integer values of these as arguments when you run pytho
 
 |Optional Arguments | Description|
 |:-------------|:-------------|
-| `--aim_lock_key`          |Hold this key to lock the aim onto a target close to your cursor. (default: shift)|
-| `--flurry_lock_key`       |Hold this key to chase a target and punch quickly. (default: q)|
-| `--fire_lock_key`         |Activate automatic firing on aim locked targets. (default: f)|
+| `--aim_lock_key`          |Hold this key to lock the aim onto a target close to your cursor (default: shift)|
+| `--switch_key`       |This key should be the (stow weapons) key on surviv (default: f)|
+| `--fire_lock_key`         |Activate automatic firing on aim locked targets (default: q)|
+| `--aim_fine_tune`         |Fine tune the aim prediction, should be close to 1 (default: 1.)|
+| `--stop_key`         |Stops the bot (default: L)|
 
