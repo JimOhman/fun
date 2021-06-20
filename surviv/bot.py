@@ -138,12 +138,12 @@ class SurvivBot(threading.Thread):
     '''
 
     self.grab_info_code = '''
-     function() {
-       return [window.myInfo, 
-               window.targetInfo, 
-               window.gunType,
-               window.gunLength,
-               window.scale];
+    function() {
+      return [window.myInfo, 
+              window.targetInfo, 
+              window.gunType,
+              window.gunLength,
+              window.scale];
      }
      '''
 
@@ -153,7 +153,7 @@ class SurvivBot(threading.Thread):
 
     print("Succesfully injected!")
     self.online = True
-  
+
   def point_to_screen(self, point, scale):
     x = self.middle_of_screen['x'] + point[0]*scale
     y = self.middle_of_screen['y'] - point[1]*scale
@@ -177,8 +177,8 @@ class SurvivBot(threading.Thread):
       vbn = vb**2
       bp = np.dot(db, vp)
       de = (vbn - vpn)
-      diff = (bp - bl*vb)
-      time = (diff + np.sqrt(diff**2 + (dbn-bl**2)*de)) / de
+      diff = (bp - bl*vb) / de
+      time = (diff + np.sqrt(diff**2 + (dbn-bl**2)/de))
       if time < 0:
         self.activate_flurry = True
         self.switch_to_flurry = True
@@ -243,7 +243,6 @@ class SurvivBot(threading.Thread):
     self.needs_key_clear = True
 
   async def keyboard_lock(self, target_pos, target_dir, dist_vec):
-
     dist = np.linalg.norm(dist_vec)
 
     if (np.dot(dist_vec, target_dir)) <= 0:
@@ -344,7 +343,7 @@ if __name__ == '__main__':
                          help='set the same as stow weapons key on surviv')
     parser.add_argument('--stop_key', type=str, default="L",
                          help='key to stop the program')
-    parser.add_argument('--aim_fine_tune', type=float, default=1.,
+    parser.add_argument('--aim_fine_tune', type=float, default=0.93,
                          help='fine tune the amount of aim prediction')
     parser.add_argument('--screen_width', type=int, default=2560,
                          help='width of your screen')
