@@ -13,7 +13,7 @@ class SurvivBot(threading.Thread):
     self.connection = await pyp.connect(browserURL='http://127.0.0.1:9222')
     self.page = (await self.connection.pages())[-1]
 
-    self.fire_lock_on = False
+    self.fire_on = False
     self.mouse_lock_on = False
     self.keyboard_lock_on = False
     self.flurry_on = False
@@ -37,6 +37,12 @@ class SurvivBot(threading.Thread):
     self.bullet_scale = walking_speed * ak47_ratio
     self.bullet_scale *= self.args.aim_fine_tune
     self.target_vel = np.array([0, 0])
+
+    self.double_fire_on = False
+    self.use_switch_delay = False
+    self.free_switch_time = time.time()
+    self.prev_time = time.time()
+    self.delay = 0.
 
     self.middle_of_screen = {'x': self.args.screen_width/2, 
                              'y': self.args.screen_height/2}
@@ -143,6 +149,8 @@ class SurvivBot(threading.Thread):
               window.targetInfo, 
               window.gunType,
               window.gunLength,
+              window.switchDelay,
+              window.fireDelay,
               window.scale];
      }
      '''
@@ -164,7 +172,7 @@ class SurvivBot(threading.Thread):
     target_pred = dist_vec
     bullet_speed = get_bullet_speed(gun_type)
     if bullet_speed is None:
-      if np.linalg.norm(dist_vec) < 3.5:
+      if np.linalg.norm(dist_vec) < 3.1:
         self.activate_flurry = True
       return target_pred, dist_vec
     vp = self.target_vel
@@ -210,7 +218,7 @@ class SurvivBot(threading.Thread):
 
   async def mouse_lock(self):
     game_info = await self.page.evaluate(self.grab_info_code)
-    my_info, target_info, gun_type, gun_length, scale = game_info
+    my_info, target_info, gun_type, gun_length, switch_delay, fire_delay, scale = game_info
 
     if target_info:
       target = self.get_target(my_info, target_info, gun_type, gun_length)
@@ -224,16 +232,40 @@ class SurvivBot(threading.Thread):
           await self.page.keyboard.press(args.switch_key, options={'delay': 50})
           self.switch_to_flurry = False
         self.keyboard_lock_on = True
-        self.fire_lock_on = True
+        self.fire_on = True
         self.flurry_on = True
         self.activate_flurry = False
 
-      if self.fire_lock_on:
+      if self.fire_on:
+
+        if self.use_switch_delay:
+          self.delay = switch_delay
+
         if self.flurry_on:
           await self.keyboard_lock(target_pred_pos, 
                                    target_dir,
                                    dist_vec)
-        await self.page.mouse.click(x, y, options={'delay': 50})
+          await self.page.mouse.click(x, y, options={'delay': 50})
+
+        elif (time.time() - self.prev_time) > self.delay:
+          await self.page.mouse.click(x, y, options={'delay': 50})
+          self.delay = fire_delay
+
+          if self.double_fire_on:
+            await self.page.mouse.click(x, y, options={'button': 'right',
+                                                       'delay': 50})
+            if (time.time() - self.free_switch_time) > 1:
+              self.free_switch_time = time.time()
+              self.use_switch_delay = False
+              self.delay = 0.25
+            else:
+              self.use_switch_delay = True
+
+            self.prev_time = time.time()
+
+        else:
+          await self.page.mouse.move(x, y);
+
       else:
         await self.page.mouse.move(x, y);
 
@@ -298,7 +330,8 @@ def main(args):
       aim_lock_key = keyboard.Key.shift
     else:
       aim_lock_key = keyboard.KeyCode(char=args.aim_lock_key)
-    fire_lock_key = keyboard.KeyCode(char=args.fire_lock_key)
+    fire_key = keyboard.KeyCode(char=args.fire_key)
+    double_fire_key = keyboard.KeyCode(char=args.double_fire_key)
     stop_key = keyboard.KeyCode(char=args.stop_key)
 
     def release_callback(key):
@@ -306,20 +339,32 @@ def main(args):
         bot.mouse_lock_on = False
         if bot.flurry_on:
           bot.keyboard_lock_on = False
-          bot.fire_lock_on = False
+          bot.fire_on = False
           bot.flurry_on = False
 
     def press_callback(key):
       if key == aim_lock_key:
         bot.mouse_lock_on = True
-      elif key == fire_lock_key:
-        bot.fire_lock_on = not bot.fire_lock_on
+      elif key == fire_key:
+        bot.fire_on = not bot.fire_on
+        if bot.fire_on:
+          print("Automatic firing activated!")
+        else:
+          print("Automatic firing deactivated!")
+      elif key == double_fire_key:
+        bot.double_fire_on = not bot.double_fire_on
+        if bot.double_fire_on:
+          print("Automatic double firing activated!")
+          bot.fire_on = True
+        else:
+          print("Automatic double firing deactivated!")
+          bot.fire_on = False
       elif key == stop_key:
         print("Shutting down")
         bot.online = False
         bot.mouse_lock_on = False
         bot.keyboard_lock_on = False
-        bot.fire_lock_on = False
+        bot.fire_on = False
         listener.stop()
 
     with keyboard.Listener(on_press=press_callback, 
@@ -337,13 +382,15 @@ if __name__ == '__main__':
                                      formatter_class=RawTextHelpFormatter)
     parser.add_argument('--aim_lock_key', type=str, default="shift",
                          help='hold key to lock aim onto a target')
-    parser.add_argument('--fire_lock_key', type=str, default="q",
+    parser.add_argument('--fire_key', type=str, default="q",
                          help='key to activate automatic firing')
+    parser.add_argument('--double_fire_key', type=str, default="e",
+                         help='key to activate automatic double firing')
     parser.add_argument('--switch_key', type=str, default="f",
                          help='set the same as stow weapons key on surviv')
     parser.add_argument('--stop_key', type=str, default="L",
                          help='key to stop the program')
-    parser.add_argument('--aim_fine_tune', type=float, default=0.93,
+    parser.add_argument('--aim_fine_tune', type=float, default=0.92,
                          help='fine tune the amount of aim prediction')
     parser.add_argument('--screen_width', type=int, default=2560,
                          help='width of your screen')
