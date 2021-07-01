@@ -22,11 +22,12 @@ Currently, it is a bit annoying to start but its not too bad once you get used t
 4. Place a breakpoint at line 75045 and join a game.
 5. When the breakpoint is hit, enter the following into the console:
 
-     window.pool = _0x3eb69a.m_playerPool;
-     window.pixiApp = _0x1be72c.game.pixi;
-     window.input = _0x4c20d4.input;
-     window.displayInfo = _0x53d41f;
-     window.me = this;
+     window.pool = _0x39177f.m_playerPool;
+     window.teamInfo = _0x39177f.teamInfo;
+     window.playerInfo = _0x39177f.m_playerInfo;
+     window.pixiApp = _0x20608c.game.pixi;
+     window.input = _0x2abe74.input;
+     window.displayInfo = _0x371c09;
 
 6. Close the debugger and run python bot.py.
 7. Play!
