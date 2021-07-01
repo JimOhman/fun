@@ -71,9 +71,23 @@ class SurvivBot(threading.Thread):
     var closeColor = 0xff0000;
     var belowColor = 0x000000;
 
+    var players = window.pool.m_pool;
+    var teamInfo = window.teamInfo;
+    for (i = 0; i < players.length; i++) {
+      player = players[i];
+      if (player.m_localData.m_zoom) {
+        window.me = player;
+        for (let [key, team] of Object.entries(teamInfo)) {
+          if (team.playerIds.includes(window.me.__id)) {
+            window.teamId = parseInt(key);
+          };
+        };
+      };
+    };
+
     function updateTraces(deltaTime) {
-      var pool = window.pool.m_pool
-      me = window.me;
+      var pool = window.pool.m_pool;
+      var me = window.me;
 
       myMousePos = window.input.m_mousePos;
       myPointMousePos = screenToPoint(myMousePos, me); 
@@ -105,7 +119,9 @@ class SurvivBot(threading.Thread):
           const targetId = target.__id;
 
           if (targetId !== me.__id) {
-            if (target.active && !target.m_netData.m_dead) {
+            var active_player = (target.active && !target.m_netData.m_dead);
+            var is_enemy = window.playerInfo[targetId].teamId !== window.teamId;
+            if (active_player && is_enemy) {
               if (traces[targetId] !== undefined) {
                 trace = traces[targetId]
               } else {
@@ -137,7 +153,11 @@ class SurvivBot(threading.Thread):
             }
           }
         }
-      }
+      } else {
+          for (let key in traces) {
+            traces[key].destroy();
+          };
+      };
     };
 
     window.pixiApp.ticker.add(updateTraces);
@@ -390,11 +410,11 @@ if __name__ == '__main__':
                          help='set the same as stow weapons key on surviv')
     parser.add_argument('--stop_key', type=str, default="L",
                          help='key to stop the program')
-    parser.add_argument('--aim_fine_tune', type=float, default=0.92,
+    parser.add_argument('--aim_fine_tune', type=float, default=1.,
                          help='fine tune the amount of aim prediction')
-    parser.add_argument('--screen_width', type=int, default=2560,
+    parser.add_argument('--screen_width', type=int, default=1920,
                          help='width of your screen')
-    parser.add_argument('--screen_height', type=int, default=1330,
+    parser.add_argument('--screen_height', type=int, default=970,
                          help='height of your screen')
     args = parser.parse_args()
 
