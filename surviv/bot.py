@@ -410,7 +410,7 @@ if __name__ == '__main__':
                          help='set the same as stow weapons key on surviv')
     parser.add_argument('--stop_key', type=str, default="L",
                          help='key to stop the program')
-    parser.add_argument('--aim_fine_tune', type=float, default=1.,
+    parser.add_argument('--aim_fine_tune', type=float, default=0.92,
                          help='fine tune the amount of aim prediction')
     parser.add_argument('--screen_width', type=int, default=1920,
                          help='width of your screen')
