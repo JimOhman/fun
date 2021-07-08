@@ -19,15 +19,15 @@ Currently, it is a bit annoying to start but its not too bad once you get used t
 1. Open up Chrome with the --remote-debugging-port=9222 flag.
 2. Go to surviv.io and open up the debugger (Ctrl+Shift+I).
 3. In the Sources tab, open surviv.io/js/app.js and prettify the code.
-4. Place a breakpoint at line 75045 and join a game.
+4. Place a breakpoint at line 75072 and join a game.
 5. When the breakpoint is hit, enter the following into the console:
 
-     window.pool = _0x39177f.m_playerPool;
-     window.teamInfo = _0x39177f.teamInfo;
-     window.playerInfo = _0x39177f.m_playerInfo;
-     window.pixiApp = _0x20608c.game.pixi;
-     window.input = _0x2abe74.input;
-     window.displayInfo = _0x371c09;
+     window.pool = _0x15510f.m_playerPool;
+     window.teamInfo = _0x15510f.teamInfo;
+     window.playerInfo = _0x15510f.m_playerInfo;
+     window.pixiApp = _0x1eaed5.game.pixi;
+     window.input = _0x11596f.input
+     window.displayInfo = _0x1dc4e8;
 
 6. Close the debugger and run python bot.py.
 7. Play!
