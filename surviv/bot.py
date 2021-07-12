@@ -44,6 +44,8 @@ class SurvivBot(threading.Thread):
     self.prev_time = time.time()
     self.delay = 0.
 
+    self.prev_target_id = ''
+
     self.middle_of_screen = {'x': self.args.screen_width/2, 
                              'y': self.args.screen_height/2}
     
@@ -65,7 +67,7 @@ class SurvivBot(threading.Thread):
     };
 
     window.myInfo = [];
-    window.targetInfo = [];
+    window.targetInfo = {};
     var traces = {};
 
     var closeColor = 0xff0000;
@@ -107,7 +109,7 @@ class SurvivBot(threading.Thread):
         window.gunLength = 0;
       };
       
-      window.targetInfo = [];
+      window.targetInfo = {};
 
       for (let targetId in traces) {
         traces[targetId].clear()
@@ -142,9 +144,9 @@ class SurvivBot(threading.Thread):
               trace.moveTo(myScreenPos.x, myScreenPos.y);
               trace.lineTo(targetScreenPos.x, targetScreenPos.y);
 
-              window.targetInfo.push([[target.pos.x, target.pos.y],
-                                      [target.posOld.x, target.posOld.y],
-                                      [target.dir.x , target.dir.y]]);
+              window.targetInfo[targetId] = [[target.pos.x, target.pos.y],
+                                             [target.posOld.x, target.posOld.y],
+                                             [target.dir.x , target.dir.y]];
 
             }
             else if (target.m_netData.m_dead && traces[targetId] !== undefined) {
@@ -153,10 +155,6 @@ class SurvivBot(threading.Thread):
             }
           }
         }
-      } else {
-          for (let key in traces) {
-            traces[key].destroy();
-          };
       };
     };
 
@@ -216,10 +214,16 @@ class SurvivBot(threading.Thread):
 
   def get_target(self, my_info, target_info, gun_type, gun_length):
     my_pos, my_old_pos, my_mouse_pos = np.array(my_info)
-    targets = np.array(target_info)
-    
-    target_dists = ((targets[:, 0, :] - my_mouse_pos)**2).sum(axis=1)
-    target_pos, target_old_pos, target_dir = targets[target_dists.argmin()]
+
+    if self.prev_target_id not in target_info.keys():
+      targets = np.array(list(target_info.values()))
+      target_dists = ((targets[:, 0, :] - my_mouse_pos)**2).sum(axis=1)
+      target_idx = target_dists.argmin()
+      target_pos, target_old_pos, target_dir = targets[target_idx]
+      self.prev_target_id = list(target_info.keys())[target_idx]
+      self.still_ticker = 0
+    else:
+      target_pos, target_old_pos, target_dir = np.array(target_info[self.prev_target_id])
 
     if (target_pos != target_old_pos).any():
       self.target_vel = target_pos - target_old_pos
@@ -227,7 +231,7 @@ class SurvivBot(threading.Thread):
     else:
       self.still_ticker += 1
 
-    if self.still_ticker > 10:
+    if self.still_ticker > 15:
       self.target_vel = np.array([0, 0])
 
     target_pred_pos, dist_vec = self.get_pred_target(target_pos, 
@@ -327,6 +331,7 @@ class SurvivBot(threading.Thread):
       [await self.page.keyboard.up(key) for key in self.mov_keys]
       self.needs_key_clear = False
     self.target_vel = np.array([0, 0])
+    self.prev_target_id = ''
 
   def run(self):
     loop = asyncio.new_event_loop()
@@ -412,9 +417,9 @@ if __name__ == '__main__':
                          help='key to stop the program')
     parser.add_argument('--aim_fine_tune', type=float, default=0.92,
                          help='fine tune the amount of aim prediction')
-    parser.add_argument('--screen_width', type=int, default=1920,
+    parser.add_argument('--screen_width', type=int, default=2560,
                          help='width of your screen')
-    parser.add_argument('--screen_height', type=int, default=970,
+    parser.add_argument('--screen_height', type=int, default=1329,
                          help='height of your screen')
     args = parser.parse_args()
 
