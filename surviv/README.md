@@ -3,7 +3,7 @@
 This is built on a script that talks to the Chrome browser using [pyppeteer](https://github.com/pyppeteer/pyppeteer) and grabs info about the game.
 This info is then used to create a predictive aimbot and wallhack, as well as automatic punch chasing.
 
-The code is completely transparent, approx 400 lines of code. In other words, it is clear that there is no shady bussiness going on.
+The code is completely transparent, approx 400 lines of code. In other words, it is clear that there is no shady business going on.
 The trade-off is that starting the bot is a tiny bit more annoying than pressing a button.
 
 ---
