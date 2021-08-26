@@ -22,12 +22,12 @@ Currently, it is a bit annoying to start but its not too bad once you get used t
 4. Place a breakpoint at line 75072 and join a game.
 5. When the breakpoint is hit, enter the following into the console:
 
-     window.pool = _0x15510f.m_playerPool;
-     window.teamInfo = _0x15510f.teamInfo;
-     window.playerInfo = _0x15510f.m_playerInfo;
-     window.pixiApp = _0x1eaed5.game.pixi;
-     window.input = _0x11596f.input
-     window.displayInfo = _0x1dc4e8;
+     window.pool = _0x4f4f10.m_playerPool;
+     window.teamInfo = _0x4f4f10.teamInfo;
+     window.playerInfo = _0x4f4f10.m_playerInfo;
+     window.pixiApp = _0x3aef18.game.pixi;
+     window.input = _0x1bbb85.input
+     window.displayInfo = _0x2d1004;
 
 6. Close the debugger and run python bot.py.
 7. Play!
@@ -52,8 +52,9 @@ Then you can provide the integer values of these as arguments when you run pytho
 |Optional Arguments | Description|
 |:-------------|:-------------|
 | `--aim_lock_key`          |Hold this key to lock the aim onto a target close to your cursor (default: shift)|
+| `--fire_key`          |Key to activate automatic firing when aim locked (default: shift)|
+| `--double_fire_key`          |Key to activate automatic fire-switch-fire-switch when aim locked (default: shift)|
 | `--switch_key`       |This key should be the (stow weapons) key on surviv (default: f)|
-| `--fire_lock_key`         |Activate automatic firing on aim locked targets (default: q)|
-| `--aim_fine_tune`         |Fine tune the aim prediction, should be close to 1 (default: 1.)|
+| `--aim_fine_tune`         |Fine tune the aim prediction, value should be close to default (default: 0.92)|
 | `--stop_key`         |Stops the bot (default: L)|
 
