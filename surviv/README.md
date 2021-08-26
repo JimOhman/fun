@@ -56,5 +56,5 @@ Then you can provide the integer values of these as arguments when you run pytho
 | `--double_fire_key`          |Key to activate automatic fire-switch-fire-switch when aim locked (default: shift)|
 | `--switch_key`       |This key should be the (stow weapons) key on surviv (default: f)|
 | `--aim_fine_tune`         |Fine tune the aim prediction, value should be close to default (default: 0.92)|
-| `--stop_key`         |Stops the bot (default: L)|
+| `--stop_key`         |This key stops the bot (default: L)|
 
